@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, type ReactNode } from 'react';
 import * as echarts from 'echarts';
 import { useInView } from '../lib/useInView';
 import { KpiCard } from './KpiCard';
@@ -8,7 +8,7 @@ import { EnvironmentCard } from './EnvironmentCard';
 import { CampusEnergyMap } from './CampusEnergyMap';
 import type { OverviewData, TimeSeriesPoint, DailyTrend, MonthlyTrend, Scenario } from './types';
 
-function R({ children, delay = 0, className = '' }: { children: React.ReactNode; delay?: number; className?: string }) {
+function R({ children, delay = 0, className = '' }: { children: ReactNode; delay?: number; className?: string }) {
   const { ref, revealed } = useInView({ delay: delay * 120 });
   return (
     <div ref={ref} className={`${revealed ? 'reveal-visible' : 'reveal-hidden'} ${className}`}

@@ -1,8 +1,9 @@
+import { type ReactNode } from 'react';
 import { useInView } from '../lib/useInView';
 import { EChartsWrapper } from './EChartsWrapper';
 import type { TimeSeriesPoint, DailyTrend, Scenario, OverviewData } from './types';
 
-function R({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
+function R({ children, delay = 0 }: { children: ReactNode; delay?: number }) {
   const { ref, revealed } = useInView({ delay: delay * 150 });
   return (
     <div ref={ref} className={revealed ? 'reveal-visible' : 'reveal-hidden'}
@@ -12,7 +13,7 @@ function R({ children, delay = 0 }: { children: React.ReactNode; delay?: number 
   );
 }
 
-function ChapterBlock({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
+function ChapterBlock({ children, delay = 0 }: { children: ReactNode; delay?: number }) {
   return <R delay={delay}>{children}</R>;
 }
 

@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Leaf, Factory, TreePine, Banknote, Building2, Scale } from 'lucide-react';
 import { useInView } from '../lib/useInView';
 import { AnimatedNumber } from './AnimatedNumber';
 import { ChinaEnergyMap } from './ChinaEnergyMap';
 import type { CarbonLedger, OverviewData } from './types';
 
-function R({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
+function R({ children, delay = 0 }: { children: ReactNode; delay?: number }) {
   const { ref, revealed } = useInView({ delay: delay * 150 });
   return (
     <div ref={ref} className={revealed ? 'reveal-visible' : 'reveal-hidden'}

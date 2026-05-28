@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
+import type { CSSProperties } from 'react';
 import * as echarts from 'echarts';
 
-interface Props { option: any; className?: string; style?: React.CSSProperties; }
+interface Props { option: any; className?: string; style?: CSSProperties; }
 
 export function EChartsWrapper({ option, className, style }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
