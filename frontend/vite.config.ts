@@ -3,8 +3,7 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  // GitHub Pages base path — change to your repo name
-  base: process.env.VITE_BASE || '/',
+  base: '/luminous-carbon-atlas/',
   server: {
     port: 5173,
     proxy: {
