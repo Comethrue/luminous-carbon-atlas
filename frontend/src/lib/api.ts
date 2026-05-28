@@ -117,7 +117,7 @@ function getMock<T>(path: string): T {
       campusAnnualPotentialCo2Kg: +(cum * 200 * C.carbonFactor).toFixed(1),
     },
     '/sources': [
-      { id: 'carbon', label: '碳排放因子', value: '0.6205 kgCO₂/kWh', source: '生态环境部 2024年第10号公告' },
+      { id: 'carbon', label: '碳排放因子', value: '0.6205 kgCO₂/kWh', source: '生态环境部 2025年第10号公告' },
       { id: 'lighting', label: '照明标准', value: 'LPD ≤ 9 W/m²', source: 'GB 50034-2013' },
       { id: 'price', label: '电价基准', value: '0.55 元/kWh', source: '湖北省发改委' },
       { id: 'tree', label: '碳汇换算', value: '21.77 kgCO₂/株/年', source: '国家林草局 LY/T 2988' },
@@ -134,7 +134,7 @@ function getMock<T>(path: string): T {
         },
         _source: 'simulated',
       },
-      carbonIntensity: { value: 628.3, unit: 'gCO2/kWh', source: 'simulated (基于生态环境部2024均值动态模拟)' },
+      carbonIntensity: { value: 628.3, unit: 'gCO2/kWh', source: 'simulated (基于生态环境部2025均值动态模拟)' },
       timestamp: new Date().toISOString(),
     },
     '/environment/lighting': {

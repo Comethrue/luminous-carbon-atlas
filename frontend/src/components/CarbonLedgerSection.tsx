@@ -31,7 +31,7 @@ export function CarbonLedgerSection({ ledger, overview }: Props) {
   }, []);
   const entries = [
     { icon: Factory, label: '节约标准煤', value: ledger.coalSavedKg, unit: 'kg', color: '#FF9500', source: 'GB/T 2589-2020 · 0.330 kgce/kWh' },
-    { icon: Leaf, label: 'CO₂ 减排', value: ledger.co2ReducedKg, unit: 'kg', color: '#34C759', source: '生态环境部 2024 · 0.6205 kgCO₂/kWh' },
+    { icon: Leaf, label: 'CO₂ 减排', value: ledger.co2ReducedKg, unit: 'kg', color: '#34C759', source: '生态环境部 2025 · 0.6205 kgCO₂/kWh' },
     { icon: TreePine, label: '等效植树', value: ledger.treeEquivalent, unit: '棵', color: '#34C759', source: '国家林草局 · 21.77 kgCO₂/株/年', decimals: 2 },
     { icon: Banknote, label: '节省电费', value: ledger.costSavedYuan, unit: '元', color: '#FFD700', source: '湖北省发改委 · 0.55 元/kWh', decimals: 0 },
     { icon: Building2, label: '可供电教室', value: ledger.classroomsPowered, unit: '天', color: '#00D4FF', source: '等效全亮天数', decimals: 0 },

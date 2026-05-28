@@ -138,4 +138,4 @@ def _compute_lighting_impact(data: dict) -> dict:
 
 def fetch_carbon_intensity() -> dict:
     return {"value": 620.5, "unit": "gCO2/kWh",
-            "source": "生态环境部 2024年全国电力平均碳排放因子"}
+            "source": "生态环境部 2025年全国电力平均碳排放因子"}

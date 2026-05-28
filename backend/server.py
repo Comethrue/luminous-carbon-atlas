@@ -248,7 +248,7 @@ def sources():
     return [
         {
             "id": "carbon", "label": "碳排放因子", "value": f"{CARBON_FACTOR} kgCO₂/kWh",
-            "source": "生态环境部 2024年第10号公告",
+            "source": "生态环境部 2025年第10号公告",
         },
         {
             "id": "lighting", "label": "照明标准", "value": "LPD ≤ 9 W/m², 桌面 ≥ 300 lux",

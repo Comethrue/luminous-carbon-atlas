@@ -58,7 +58,7 @@ CACHE_TTL = 120  # 2分钟
 def _simulate_carbon_price() -> dict:
     """
     模拟上海环境能源交易所碳配额(CEA)价格。
-    实际价格范围: 50-90 元/吨CO₂ (2024-2026年区间)
+    实际价格范围: 50-90 元/吨CO₂ (2025-2026年区间)
     """
     base = 72.5  # 基准价
     hour = datetime.now().hour

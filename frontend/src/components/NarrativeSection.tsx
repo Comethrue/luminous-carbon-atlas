@@ -53,7 +53,7 @@ const chapters = [
     id: 'ch04',
     title: '每一度电，都有一笔生态账',
     subtitle: 'Chapter 04 — The Carbon Ledger',
-    insight: '每节省 1 kWh 电力，即减少 0.6205 kg CO₂ 排放（生态环境部2024），折合 0.330 kg 标准煤（GB/T 2589）。每 21.77 kg CO₂ 减排等效于一棵乔木一年的碳汇量。',
+    insight: '每节省 1 kWh 电力，即减少 0.6205 kg CO₂ 排放（生态环境部2025），折合 0.330 kg 标准煤（GB/T 2589）。每 21.77 kg CO₂ 减排等效于一棵乔木一年的碳汇量。',
     highlight: '144.0 kg',
     highlightLabel: '累计CO₂减排',
   },

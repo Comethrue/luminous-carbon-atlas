@@ -10,7 +10,7 @@
 // PHYSICAL CONSTANTS (from scraper/authoritative_data.json)
 // ═══════════════════════════════════════════════════════════
 
-/** kgCO2 per kWh — 生态环境部 2024年电力碳排放因子公告 */
+/** kgCO2 per kWh — 生态环境部 2025年电力碳排放因子公告 */
 export const CARBON_FACTOR = 0.6205;
 
 /** 元/kWh — 湖北省发改委 居民合表电价 */
@@ -51,7 +51,7 @@ export const DATA_SOURCES = [
     id: 'carbon',
     label: '碳排放因子',
     value: `${CARBON_FACTOR} kgCO₂/kWh`,
-    source: '生态环境部 2024年第10号公告',
+    source: '生态环境部 2025年第10号公告',
     url: 'https://www.mee.gov.cn/xxgk2018/xxgk/xxgk01/202504/t20250430_1109553.html',
   },
   {

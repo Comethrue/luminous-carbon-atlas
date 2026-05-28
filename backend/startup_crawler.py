@@ -88,7 +88,7 @@ def fetch_carbon_price() -> dict:
 def fetch_grid_emission_factor() -> dict:
     """
     电网碳排放因子 — 生态环境部每年发布。
-    2024年数据: 0.6205 kgCO2/kWh (全国平均)
+    2025年数据: 0.6205 kgCO2/kWh (全国平均)
     更新时自动采用最新值。
     """
     result = {"source": "生态环境部", "success": False, "factor": 0.6205}
@@ -106,7 +106,7 @@ def fetch_grid_emission_factor() -> dict:
                 result["success"] = True
                 result["method"] = "official_announcement"
     except Exception:
-        result["note"] = "官方页面不可达，使用2024年公告值"
+        result["note"] = "官方页面不可达，使用2025年公告值"
 
     result["unit"] = "kgCO2/kWh"
     result["fetched_at"] = datetime.now().isoformat()

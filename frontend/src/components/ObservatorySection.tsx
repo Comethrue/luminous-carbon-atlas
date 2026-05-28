@@ -77,7 +77,7 @@ export function ObservatorySection({ overview, live, timeSeries24h, weekly, mont
             <R key={i} delay={1+i}>
               {i===0 && <KpiCard label="累计节电" value={overview.totalSavedKwh} unit="kWh" color="cyan" decimals={1} />}
               {i===1 && <KpiCard label="节能率" value={overview.savingRate} unit="%" color="gold" trend={2.1} />}
-              {i===2 && <KpiCard label="CO₂ 减排" value={overview.co2ReducedKg} unit="kg" color="green" subtitle="0.6205 kgCO₂/kWh · 生态环境部2024" />}
+              {i===2 && <KpiCard label="CO₂ 减排" value={overview.co2ReducedKg} unit="kg" color="green" subtitle="0.6205 kgCO₂/kWh · 生态环境部2025" />}
               {i===3 && <KpiCard label="等效植树" value={overview.treeEquivalent} unit="棵" color="green" decimals={2} subtitle="21.77 kgCO₂/株/年 · 国家林草局" />}
               {i===4 && <KpiCard label="节省电费" value={overview.costSavedYuan} unit="元" color="gold" decimals={0} subtitle="0.55 元/kWh · 湖北省发改委" />}
             </R>
