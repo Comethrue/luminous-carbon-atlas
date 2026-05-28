@@ -19,9 +19,14 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install dependencies
+      - name: Clean install
         working-directory: frontend
-        run: npm install
+        run: |
+          rm -rf node_modules
+          npm install
+
+      - name: List components (debug)
+        run: ls frontend/src/components/
 
       - name: Build
         working-directory: frontend
