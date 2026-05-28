@@ -4,3 +4,4 @@ __pycache__/
 *.pyc
 .env
 data/live_cache.json
+frontend/package-lock.json
