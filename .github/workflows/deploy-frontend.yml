@@ -25,6 +25,8 @@ jobs:
 
       - name: Build
         working-directory: frontend
+        env:
+          VITE_API_BASE: https://luminous-carbon-atlas.onrender.com
         run: npm run build
 
       - name: Upload to GitHub Pages

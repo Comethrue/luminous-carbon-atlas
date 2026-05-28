@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
-const BASE = '/api';
+const API_HOST = (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_API_BASE) || '';
+const BASE = API_HOST + '/api';
 
 async function fetchJSON<T>(path: string): Promise<T> {
   try {
