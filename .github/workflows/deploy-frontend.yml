@@ -19,20 +19,13 @@ jobs:
         with:
           node-version: 20
 
-      - name: Clean install
-        working-directory: frontend
-        run: |
-          rm -rf node_modules
-          npm install
-
-      - name: List components (debug)
-        run: ls frontend/src/components/
-
-      - name: Build
+      - name: Install & Build
         working-directory: frontend
         env:
           VITE_API_BASE: https://luminous-carbon-atlas.onrender.com
-        run: npm run build
+        run: |
+          npm install
+          npm run build
 
       - name: Upload to GitHub Pages
         uses: actions/upload-pages-artifact@v3
