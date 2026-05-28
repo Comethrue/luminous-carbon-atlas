@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { Sun, Cloud, Wind, Eye, Thermometer, Droplets, Radio } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { API_BASE } from '../lib/api';
 
 interface LightingImpact {
   need_artificial_light: boolean;
@@ -24,7 +25,7 @@ interface EnvData {
 function useEnv<T>(path: string, init: T, interval = 60000) {
   const [data, setData] = useState<T>(init);
   useEffect(() => {
-    const load = async () => { try { const r = await fetch(`/api${path}`); if (r.ok) setData(await r.json()); } catch { /* fallback */ } };
+    const load = async () => { try { const r = await fetch(`${API_BASE}${path}`); if (r.ok) setData(await r.json()); } catch { /* fallback */ } };
     load();
     const t = setInterval(load, interval);
     return () => clearInterval(t);

@@ -3,6 +3,7 @@ import { Leaf, Factory, TreePine, Banknote, Building2, Scale } from 'lucide-reac
 import { useInView } from '../lib/useInView';
 import { AnimatedNumber } from './AnimatedNumber';
 import { ChinaEnergyMap } from './ChinaEnergyMap';
+import { API_BASE } from '../lib/api';
 import type { CarbonLedger, OverviewData } from './types';
 
 function R({ children, delay = 0 }: { children: ReactNode; delay?: number }) {
@@ -22,7 +23,7 @@ export function CarbonLedgerSection({ ledger, overview }: Props) {
 
   useEffect(() => {
     const load = async () => {
-      try { const r = await fetch('/api/live-data'); if (r.ok) setLiveData(await r.json()); } catch {}
+      try { const r = await fetch(`${API_BASE}/live-data`); if (r.ok) setLiveData(await r.json()); } catch {}
     };
     load();
     const t = setInterval(load, 120000);

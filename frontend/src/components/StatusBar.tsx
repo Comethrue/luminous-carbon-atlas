@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Layers, Gauge, Megaphone } from 'lucide-react';
+import { API_BASE } from '../lib/api';
 
 interface Source { id: string; label: string; value: string; source: string; }
 interface Announcement { type: string; icon: string; text: string; time: string; }
@@ -18,7 +19,7 @@ export function StatusBar({ systemDays, timestamp, sources, lowCarbonScore }: Pr
   useEffect(() => {
     const fetchBroadcast = async () => {
       try {
-        const r = await fetch('/api/broadcast');
+        const r = await fetch(`${API_BASE}/broadcast`);
         if (r.ok) {
           const data = await r.json();
           if (data.announcements?.length) setAnnouncements(data.announcements);

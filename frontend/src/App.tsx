@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useFetch, useLiveFeed } from './lib/api';
+import { useFetch, useLiveFeed, API_BASE } from './lib/api';
 import { StatusBar } from './components/StatusBar';
 import { HeroSection } from './components/HeroSection';
 import { ObservatorySection } from './components/ObservatorySection';
@@ -15,7 +15,7 @@ function useEnv() {
   useEffect(() => {
     const load = async () => {
       try {
-        const r = await fetch('/api/environment');
+        const r = await fetch(`${API_BASE}/environment`);
         if (r.ok) setData(await r.json());
       } catch { /* fallback */ }
     };
