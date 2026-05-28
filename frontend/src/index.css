@@ -1,0 +1,172 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ═══════════════════════════════════════════════════════
+   GLOBAL STYLES — Luminous Carbon Atlas
+   ═══════════════════════════════════════════════════════ */
+@layer base {
+  body {
+    background: #060B14;
+    color: #E8EDF5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: #060B14; }
+  ::-webkit-scrollbar-thumb { background: #1A2A44; border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: #2A3A54; }
+}
+
+@layer components {
+  /* ── Glass Card ── */
+  .glass-card {
+    background: linear-gradient(135deg, rgba(13, 22, 40, 0.9) 0%, rgba(9, 16, 31, 0.95) 100%);
+    border: 1px solid rgba(0, 136, 255, 0.1);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  /* ── HUD Card (cut-corner) ── */
+  .hud-card {
+    background: linear-gradient(135deg, rgba(13, 22, 40, 0.9) 0%, rgba(9, 16, 31, 0.95) 100%);
+    border: 1px solid rgba(0, 136, 255, 0.12);
+    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+    position: relative;
+  }
+  .hud-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.3), transparent);
+  }
+
+  /* ── Glow border ── */
+  .glow-border {
+    box-shadow: 0 0 20px rgba(0, 136, 255, 0.04), inset 0 0 20px rgba(0, 136, 255, 0.02);
+  }
+
+  /* ── Text glow ── */
+  .text-glow-cyan {
+    text-shadow: 0 0 20px rgba(0, 212, 255, 0.5), 0 0 40px rgba(0, 136, 255, 0.2);
+  }
+  .text-glow-green {
+    text-shadow: 0 0 16px rgba(52, 199, 89, 0.4);
+  }
+  .text-glow-gold {
+    text-shadow: 0 0 16px rgba(255, 215, 0, 0.3);
+  }
+
+  /* ── Animated scan line ── */
+  .scanline {
+    pointer-events: none;
+    background: linear-gradient(180deg, transparent 0%, rgba(0, 136, 255, 0.02) 50%, transparent 100%);
+    animation: scan 8s linear infinite;
+  }
+  @keyframes scan {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100vh); }
+  }
+
+  /* ── Chart scan overlay ── */
+  @keyframes chartScan {
+    0% { background-position: 0 -80px; }
+    100% { background-position: 0 calc(100% + 80px); }
+  }
+
+  /* ── Performance: off-screen sections skip rendering ── */
+  section {
+    content-visibility: auto;
+    contain-intrinsic-size: 100vh;
+  }
+
+  /* ── Tooltip fade-in ── */
+  @keyframes tooltipIn {
+    0% { opacity: 0; transform: translateY(6px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Chart border glow pulse ── */
+  .chart-glow {
+    animation: chartGlow 3s ease-in-out infinite;
+  }
+  @keyframes chartGlow {
+    0%,100% { box-shadow: 0 0 15px rgba(0,180,255,0.03); }
+    50% { box-shadow: 0 0 35px rgba(0,180,255,0.08); }
+  }
+
+  /* ── SVG border dash scan (used by ZoneLightMap) ── */
+  @keyframes dashMove {
+    0% { stroke-dashoffset: 260; }
+    100% { stroke-dashoffset: -260; }
+  }
+
+  /* ── Scroll-triggered reveal animations ── */
+  .reveal-hidden {
+    opacity: 0;
+    transform: translateY(64px);
+  }
+  .reveal-visible {
+    animation: revealIn 1.1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  @keyframes revealIn {
+    0% {
+      opacity: 0;
+      transform: translateY(64px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Stagger delays */
+  .reveal-delay-1  { transition-delay: 0.05s; }
+  .reveal-delay-2  { transition-delay: 0.10s; }
+  .reveal-delay-3  { transition-delay: 0.15s; }
+  .reveal-delay-4  { transition-delay: 0.20s; }
+  .reveal-delay-5  { transition-delay: 0.25s; }
+  .reveal-delay-6  { transition-delay: 0.30s; }
+  .reveal-delay-7  { transition-delay: 0.35s; }
+  .reveal-delay-8  { transition-delay: 0.40s; }
+  .reveal-delay-9  { transition-delay: 0.45s; }
+  .reveal-delay-10 { transition-delay: 0.50s; }
+
+  /* Section title reveal */
+  @keyframes titleReveal {
+    0% { opacity: 0; letter-spacing: 0.5em; }
+    100% { opacity: 1; letter-spacing: 0.2em; }
+  }
+  .reveal-title {
+    animation: titleReveal 1.2s cubic-bezier(0.22,1,0.36,1) forwards;
+  }
+
+  /* ── Live dot ── */
+  .live-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #34C759;
+    box-shadow: 0 0 10px rgba(52, 199, 89, 0.6);
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+  @keyframes pulse-dot {
+    0%,100% { opacity: 1; }
+    50% { opacity: 0.2; }
+  }
+
+  /* ── KPI count-up ── */
+  .kpi-number {
+    font-family: 'DIN Alternate', 'Bahnschrift', 'Impact', sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* ── Page section ── */
+.section-full {
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+}
