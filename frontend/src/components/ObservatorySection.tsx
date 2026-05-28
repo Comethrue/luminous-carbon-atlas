@@ -59,9 +59,6 @@ export function ObservatorySection({ overview, live, timeSeries24h, weekly, mont
     const nonZero = savedArr.filter(v => v > 0);
     return nonZero.length > 0 ? Math.round(nonZero.reduce((a, b) => a + b, 0) / nonZero.length) : 0;
   }, [savedArr]);
-  // Current carbon intensity
-  const carbonIntensity = env?.carbonIntensity?.value ?? 620.5;
-
   return (
     <section className="min-h-screen px-6 py-24">
       <div className="max-w-[1440px] mx-auto">
@@ -312,15 +309,15 @@ export function ObservatorySection({ overview, live, timeSeries24h, weekly, mont
           <CampusEnergyMap overview={overview} live={live} />
         </div></R>
 
-        {/* Environment data annotation */}
+        {/* Natural light contribution annotation */}
         {env && (
           <div className="mt-3 text-center text-[10px] font-mono text-text-muted">
-            实时环境数据 · 自然光
-            <span className="text-gold">{env.weather?.solar_radiation ?? '--'}W/m²</span> ·
-            碳强度 <span className="text-cyan">{carbonIntensity}gCO₂/kWh</span> ·
-            照明建议 <span className="text-green">{env.weather?.lighting_impact?.recommended_brightness_pct ?? '--'}%</span>
+            自然光贡献率
+            <span className="text-green">{env.weather?.is_day ? (100 - (env.weather?.lighting_impact?.recommended_brightness_pct ?? 30)) : 0}%</span> ·
+            辐射 <span className="text-gold">{env.weather?.solar_radiation ?? '--'}W/m²</span> ·
+            人工补光 <span className="text-cyan">{env.weather?.lighting_impact?.recommended_brightness_pct ?? '--'}%</span>
             {env.weather?._source && env.weather._source !== 'simulated' && (
-              <span className="ml-2 text-cyan">· {env.weather._source === 'open-meteo' ? 'Open-Meteo LIVE' : env.weather._source + ' LIVE'}</span>
+              <span className="ml-2 text-cyan">· Open-Meteo LIVE</span>
             )}
           </div>
         )}
