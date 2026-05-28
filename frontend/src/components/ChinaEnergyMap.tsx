@@ -52,7 +52,7 @@ export function ChinaEnergyMap({ liveData }: Props) {
   useEffect(() => {
     if (geoReady) return;
     let ok = false;
-    fetch('/china.json')
+    fetch(import.meta.env.BASE_URL + 'china.json')
       .then(r => { if(!r.ok)throw Error(`HTTP ${r.status}`); return r.json(); })
       .then(geo => {
         if (ok) return;
