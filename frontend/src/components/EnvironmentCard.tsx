@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { Sun, Zap, CloudSun } from 'lucide-react';
+import { Sun, Zap, CloudSun, TrendingUp } from 'lucide-react';
 import { API_BASE } from '../lib/api';
 
 interface LightingImpact {
@@ -44,29 +44,69 @@ function useEnv<T>(path: string, init: T, interval = 30000) {
   return data;
 }
 
-// ── SVG Ring Gauge ──
-function RingGauge({ pct, size = 120, stroke = 8 }: { pct: number; size?: number; stroke?: number }) {
+// ── SVG Ring Gauge (enlarged) ──
+function RingGauge({ pct, size = 160, stroke = 10 }: { pct: number; size?: number; stroke?: number }) {
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
   const offset = c * (1 - pct / 100);
-  // Color transitions: 0-30% red, 30-60% gold, 60-100% green
   const color = pct < 30 ? '#FF3B30' : pct < 60 ? '#FFD700' : '#34C759';
 
   return (
     <svg width={size} height={size} className="transform -rotate-90">
       <defs>
         <filter id="glow">
-          <feGaussianBlur stdDeviation="2.5" result="blur" />
+          <feGaussianBlur stdDeviation="3" result="blur" />
           <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
         </filter>
+        <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor={color} stopOpacity="0.6" />
+          <stop offset="100%" stopColor={color} stopOpacity="1" />
+        </linearGradient>
       </defs>
       {/* Background ring */}
-      <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={stroke} />
+      <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth={stroke} />
       {/* Active ring */}
-      <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={color} strokeWidth={stroke}
+      <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={`url(#ringGrad)`} strokeWidth={stroke}
         strokeLinecap="round" strokeDasharray={c} strokeDashoffset={offset}
-        style={{ transition: 'stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1)', filter: `drop-shadow(0 0 6px ${color}40)` }} />
+        style={{ transition: 'stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1)', filter: `drop-shadow(0 0 8px ${color}50)` }} />
+      {/* Tick marks */}
+      {[0, 25, 50, 75].map(t => {
+        const angle = (t / 100) * 360 - 90;
+        const rad = (angle * Math.PI) / 180;
+        const x1 = size/2 + (r - stroke - 2) * Math.cos(rad);
+        const y1 = size/2 + (r - stroke - 2) * Math.sin(rad);
+        const x2 = size/2 + (r - stroke - 8) * Math.cos(rad);
+        const y2 = size/2 + (r - stroke - 8) * Math.sin(rad);
+        return <line key={t} x1={x1} y1={y1} x2={x2} y2={y2} stroke="rgba(255,255,255,0.12)" strokeWidth="1" />;
+      })}
     </svg>
+  );
+}
+
+const BASELINE_POWER_W = 480;
+
+// ── Data bar for the flow visualization ──
+function FlowBar({ left, right, leftLabel, rightLabel, leftColor = '#FFD700', rightColor = '#00D4FF' }: {
+  left: number; right: number; leftLabel: string; rightLabel: string;
+  leftColor?: string; rightColor?: string;
+}) {
+  const leftPct = Math.min(100, Math.max(0, left));
+  const rightPct = Math.min(100, Math.max(0, right));
+  return (
+    <div className="space-y-1.5">
+      <div className="flex justify-between text-[10px]">
+        <span className="text-text-secondary">{leftLabel}</span>
+        <span className="text-text-secondary">{rightLabel}</span>
+      </div>
+      <div className="flex h-2 rounded-full overflow-hidden bg-white/5">
+        <div className="transition-all duration-1000 rounded-l-full" style={{ width: `${leftPct}%`, background: leftColor }} />
+        <div className="transition-all duration-1000 rounded-r-full" style={{ width: `${rightPct}%`, background: rightColor }} />
+      </div>
+      <div className="flex justify-between text-[11px] font-mono font-bold">
+        <span style={{ color: leftColor }}>{left}</span>
+        <span style={{ color: rightColor }}>{right}</span>
+      </div>
+    </div>
   );
 }
 
@@ -76,23 +116,19 @@ export function EnvironmentCard() {
   const impact = w.lighting_impact;
   const isLive = w._source === 'open-meteo';
 
-  // 自然光贡献率 = 自然光能满足的照明比例
-  // 推荐亮度 30% → 自然光贡献 70%
   const contribution = useMemo(() => {
     if (!w.is_day) return 0;
     return Math.round(100 - impact.recommended_brightness_pct);
   }, [w.is_day, impact.recommended_brightness_pct]);
 
-  // 基于贡献率估算今日省电 (假设白天10小时, AI功率480W, 贡献率=省电比例)
   const todaySavedKwh = useMemo(() => {
     if (!w.is_day) return 0;
     const daylightHours = Math.max(0, 19 - new Date().getHours());
     return +(BASELINE_POWER_W / 1000 * daylightHours * contribution / 100).toFixed(2);
   }, [w.is_day, contribution]);
 
-  // Status text
   const statusLabel = w.is_day
-    ? contribution >= 60 ? '自然光充沛，大幅节能中' : contribution >= 30 ? '自然光适中，部分补偿' : '自然光不足，需人工补光'
+    ? contribution >= 60 ? '自然光充沛，大幅节能中' : contribution >= 30 ? '自然光适中，部分补偿中' : '自然光不足，需人工补光'
     : '夜间模式，全人工照明';
 
   const statusColor = w.is_day
@@ -103,94 +139,116 @@ export function EnvironmentCard() {
     ? contribution >= 60 ? 'rgba(52,199,89,0.08)' : contribution >= 30 ? 'rgba(255,215,0,0.08)' : 'rgba(255,149,0,0.08)'
     : 'rgba(90,112,144,0.08)';
 
+  // Scale solar radiation to 0-100 for the bar (max ~900 W/m²)
+  const solarScale = Math.min(100, Math.round((w.solar_radiation / 900) * 100));
+
   return (
-    <div className="glass-card rounded-xl p-4 glow-border h-full flex flex-col">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="text-[10px] text-text-muted tracking-[0.15em] uppercase">
-          自然光协同 · 光贡献
+    <div className="glass-card rounded-xl p-6 glow-border h-full flex flex-col">
+      {/* ── Header ── */}
+      <div className="flex items-center justify-between mb-5">
+        <div>
+          <div className="text-xs text-text-muted tracking-[0.15em] uppercase mb-0.5">
+            自然光协同
+          </div>
+          <div className="text-sm font-semibold text-text-primary tracking-wide">
+            光贡献率监测
+          </div>
         </div>
         <div className="flex items-center gap-1.5">
           <span className="live-dot" />
           <span className="text-[10px] text-cyan font-mono">
-            {isLive ? 'Open-Meteo LIVE' : w._source === 'qweather' ? '和风天气 LIVE' : '模拟 LIVE'}
+            {isLive ? 'Open-Meteo LIVE' : '模拟'}
           </span>
         </div>
       </div>
 
-      {/* Main ring gauge + data */}
-      <div className="flex items-center gap-4 flex-1">
-        {/* Ring */}
-        <div className="relative flex-shrink-0">
-          <RingGauge pct={contribution} size={110} stroke={9} />
+      {/* ── Center: Large Ring Gauge ── */}
+      <div className="flex justify-center mb-4">
+        <div className="relative">
+          <RingGauge pct={contribution} size={160} stroke={10} />
           {/* Center text */}
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-2xl font-bold font-mono" style={{ color: contribution >= 60 ? '#34C759' : contribution >= 30 ? '#FFD700' : '#FF3B30' }}>
+            <span className="text-[40px] font-bold font-mono leading-none tracking-tighter"
+              style={{ color: contribution >= 60 ? '#34C759' : contribution >= 30 ? '#FFD700' : '#FF3B30' }}>
               {contribution}
             </span>
-            <span className="text-[9px] text-text-muted">%贡献</span>
-          </div>
-        </div>
-
-        {/* Right side data */}
-        <div className="flex-1 space-y-3 min-w-0">
-          {/* Solar radiation — input */}
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-              style={{ background: 'rgba(255,215,0,0.08)' }}>
-              <Sun size={14} style={{ color: '#FFD700' }} />
-            </div>
-            <div className="min-w-0">
-              <div className="text-[9px] text-text-muted">太阳辐射 · 自然光输入</div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-lg font-bold text-gold font-mono tabular-nums">{w.solar_radiation}</span>
-                <span className="text-[10px] text-text-muted">W/m²</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Artificial brightness — output */}
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-              style={{ background: 'rgba(0,212,255,0.08)' }}>
-              <Zap size={14} style={{ color: '#00D4FF' }} />
-            </div>
-            <div className="min-w-0">
-              <div className="text-[9px] text-text-muted">人工补光 · 系统输出</div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-lg font-bold text-cyan font-mono tabular-nums">{impact.recommended_brightness_pct}</span>
-                <span className="text-[10px] text-text-muted">%亮度</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Cloud cover — obstruction */}
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-              style={{ background: 'rgba(138,153,175,0.08)' }}>
-              <CloudSun size={14} style={{ color: '#8899BB' }} />
-            </div>
-            <div className="min-w-0">
-              <div className="text-[9px] text-text-muted">云量遮挡</div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-lg font-bold text-text-primary font-mono tabular-nums">{w.cloud}</span>
-                <span className="text-[10px] text-text-muted">%</span>
-              </div>
-            </div>
+            <span className="text-[11px] text-text-muted mt-1">%</span>
           </div>
         </div>
       </div>
 
-      {/* Status bar */}
-      <div className="mt-3 rounded-lg px-3 py-2 text-[10px] font-medium flex items-center justify-between"
-        style={{ background: statusBg, color: statusColor }}>
-        <span>{w.is_day ? '☀' : '🌙'} {statusLabel}</span>
-        <span className="font-mono tabular-nums text-text-muted">
-          约省 <span style={{ color: contribution >= 30 ? '#34C759' : '#8899BB' }}>{todaySavedKwh}</span> kWh
+      {/* ── Subtitle ── */}
+      <p className="text-center text-[11px] text-text-secondary leading-relaxed mb-5 px-2">
+        当前教室所需照明中，
+        <span className="text-gold font-semibold">{contribution}%</span> 由自然光提供，
+        仅需 <span className="text-cyan font-semibold">{impact.recommended_brightness_pct}%</span> 人工补光
+      </p>
+
+      {/* ── Flow bars ── */}
+      <div className="space-y-4 mb-5">
+        <FlowBar
+          left={solarScale}
+          right={impact.recommended_brightness_pct}
+          leftLabel="自然光输入 (太阳辐射)"
+          rightLabel="人工光输出 (推荐亮度)"
+          leftColor="#FFD700"
+          rightColor="#00D4FF"
+        />
+        <FlowBar
+          left={100 - (w.cloud || 0)}
+          right={w.cloud || 0}
+          leftLabel="晴空占比"
+          rightLabel="云量遮挡"
+          leftColor="#34C759"
+          rightColor="#8899BB"
+        />
+      </div>
+
+      {/* ── 3-column data ── */}
+      <div className="grid grid-cols-3 gap-3 mb-5">
+        <div className="text-center glass-card rounded-lg p-3">
+          <Sun size={16} className="mx-auto mb-1.5 text-gold" />
+          <div className="text-[10px] text-text-muted mb-0.5">太阳辐射</div>
+          <div className="text-base font-bold text-gold font-mono tabular-nums">{w.solar_radiation}</div>
+          <div className="text-[9px] text-text-muted">W/m²</div>
+        </div>
+        <div className="text-center glass-card rounded-lg p-3">
+          <Zap size={16} className="mx-auto mb-1.5 text-cyan" />
+          <div className="text-[10px] text-text-muted mb-0.5">推荐亮度</div>
+          <div className="text-base font-bold text-cyan font-mono tabular-nums">{impact.recommended_brightness_pct}</div>
+          <div className="text-[9px] text-text-muted">%</div>
+        </div>
+        <div className="text-center glass-card rounded-lg p-3">
+          <TrendingUp size={16} className="mx-auto mb-1.5 text-green" />
+          <div className="text-[10px] text-text-muted mb-0.5">今日省电</div>
+          <div className="text-base font-bold text-green font-mono tabular-nums">{todaySavedKwh}</div>
+          <div className="text-[9px] text-text-muted">kWh</div>
+        </div>
+      </div>
+
+      {/* ── Factors tags ── */}
+      {impact.factors.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mb-4">
+          {impact.factors.map((f, i) => (
+            <span key={i} className="px-2 py-1 rounded text-[10px] bg-cyan-dim text-cyan">{f}</span>
+          ))}
+          <span className="px-2 py-1 rounded text-[10px] bg-white/5 text-text-muted">
+            {w.cloud > 60 ? '多云' : w.cloud > 30 ? '少云' : '晴朗'} · 云量{w.cloud}%
+          </span>
+        </div>
+      )}
+
+      {/* ── Status bar ── */}
+      <div className="mt-auto rounded-lg px-4 py-2.5 text-[11px] font-medium flex items-center justify-between"
+        style={{ background: statusBg, color: statusColor, border: `1px solid ${statusColor}20` }}>
+        <span className="flex items-center gap-1.5">
+          <span className="text-sm">{w.is_day ? '☀' : '🌙'}</span>
+          {statusLabel}
+        </span>
+        <span className="font-mono tabular-nums opacity-70">
+          贡献率 <span className="font-bold">{contribution}%</span>
         </span>
       </div>
     </div>
   );
 }
-
-const BASELINE_POWER_W = 480;
