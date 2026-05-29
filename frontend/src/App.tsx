@@ -5,7 +5,7 @@ import { HeroSection } from './components/HeroSection';
 import { ObservatorySection } from './components/ObservatorySection';
 import { NarrativeSection } from './components/NarrativeSection';
 import { CarbonLedgerSection } from './components/CarbonLedgerSection';
-import { SensorShowcase } from './components/SensorShowcase';
+
 import { ParticleBackground } from './components/ParticleBackground';
 import { ScanlineOverlay } from './components/ScanlineOverlay';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -89,10 +89,6 @@ export default function App() {
 
       <ErrorBoundary>
         <CarbonLedgerSection ledger={ledger.data} overview={overview.data} />
-      </ErrorBoundary>
-
-      <ErrorBoundary>
-        <SensorShowcase />
       </ErrorBoundary>
     </div>
   );
