@@ -65,192 +65,309 @@ function AtmosphericDust() {
 
 // ═══════════════════════ DETAILED Q6A BOARD ═══════════════════════
 function DetailedQ6ABoard({ npuActive = 0 }: { npuActive?: number }) {
-  const npuGridRef = useRef<THREE.Group>(null);
-  const coreCount = 64; // Simulated NPU cores as a grid
-
   return (
     <group position={[0, 0.4, 0]}>
-      {/* ── Main PCB ── */}
+      {/* ── Main PCB with edge detail ── */}
       <mesh position={[0, 0, 0]} castShadow receiveShadow>
-        <boxGeometry args={[3.6, 0.14, 2.6]} />
-        <meshStandardMaterial color={PCB_COLOR} roughness={0.22} metalness={0.08} />
+        <boxGeometry args={[4.0, 0.16, 2.8]} />
+        <meshStandardMaterial color={PCB_COLOR} roughness={0.2} metalness={0.06} />
       </mesh>
-      {/* PCB edge chamfer - top */}
-      <mesh position={[0, 0.08, 0]}>
-        <boxGeometry args={[3.55, 0.02, 2.55]} />
-        <meshStandardMaterial color="#162440" roughness={0.2} metalness={0.05} />
+      {/* PCB top silk layer — thin lighter plane */}
+      <mesh position={[0, 0.082, 0]}>
+        <boxGeometry args={[3.95, 0.005, 2.75]} />
+        <meshStandardMaterial color="#132040" roughness={0.3} metalness={0.02} />
       </mesh>
-      {/* Copper trace accent lines */}
-      {Array.from({ length: 5 }).map((_, i) => (
-        <mesh key={`trace-${i}`} position={[-1.5 + i * 0.7, 0.075, -1]} rotation={[-Math.PI / 2, 0, 0]}>
-          <planeGeometry args={[0.06, 1.8]} />
-          <meshBasicMaterial color={GOLD_DIM} transparent opacity={0.12} side={THREE.DoubleSide} />
-        </mesh>
-      ))}
 
-      {/* ── Mounting holes ── */}
-      {[[-1.6, -1.1], [1.6, -1.1], [-1.6, 1.1], [1.6, 1.1]].map(([x, z], i) => (
+      {/* ====== Board outline silkscreen ====== */}
+      <mesh position={[0, 0.085, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[3.9, 2.7]} />
+        <meshBasicMaterial color="#FFFFFF" transparent opacity={0.03} side={THREE.DoubleSide} />
+      </mesh>
+
+      {/* ====== Mounting holes ====== */}
+      {[[-1.8, -1.2], [1.8, -1.2], [-1.8, 1.2], [1.8, 1.2]].map(([x, z], i) => (
         <group key={`hole-${i}`} position={[x, 0, z]}>
           <mesh rotation={[-Math.PI / 2, 0, 0]}>
-            <ringGeometry args={[0.12, 0.18, 32]} />
-            <meshStandardMaterial color={GOLD} roughness={0.3} metalness={0.85} side={THREE.DoubleSide} />
+            <ringGeometry args={[0.14, 0.20, 48]} />
+            <meshStandardMaterial color={GOLD} roughness={0.2} metalness={0.9} side={THREE.DoubleSide} />
+          </mesh>
+          <mesh rotation={[-Math.PI / 2, 0, 0]}>
+            <ringGeometry args={[0.18, 0.22, 48]} />
+            <meshStandardMaterial color="#888" roughness={0.4} metalness={0.5} side={THREE.DoubleSide} />
           </mesh>
         </group>
       ))}
 
-      {/* ── RK3588 SoC (center) ── */}
-      <group position={[0, 0.15, 0]}>
-        {/* Chip substrate */}
-        <mesh castShadow>
-          <boxGeometry args={[1.4, 0.15, 1.4]} />
-          <meshStandardMaterial color="#1E1E2E" roughness={0.12} metalness={0.35} />
-        </mesh>
-        {/* Die top surface */}
-        <mesh position={[0, 0.09, 0]}>
-          <boxGeometry args={[1.25, 0.04, 1.25]} />
-          <meshStandardMaterial color="#252535" roughness={0.08} metalness={0.4} />
-        </mesh>
-        {/* Silicon die engraving */}
-        <mesh position={[0, 0.115, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <planeGeometry args={[0.9, 0.9]} />
-          <meshBasicMaterial color="#2A2A38" transparent opacity={0.3} side={THREE.DoubleSide} />
-        </mesh>
+      {/* ====== Silkscreen component outlines ====== */}
+      {[
+        { x: 0, z: 0, w: 1.6, h: 1.6, label: 'U1' },
+        { x: -1.0, z: -1.1, w: 0.4, h: 0.3, label: 'U2' },
+        { x: 1.0, z: -1.1, w: 0.4, h: 0.3, label: 'U3' },
+        { x: -1.0, z: 1.1, w: 0.4, h: 0.3, label: 'U4' },
+        { x: 1.0, z: 1.1, w: 0.4, h: 0.3, label: 'U5' },
+        { x: -1.35, z: -0.5, w: 0.35, h: 0.35, label: 'U6' },
+        { x: 1.35, z: -0.5, w: 0.45, h: 0.4, label: 'U7' },
+        { x: 1.5, z: 0.9, w: 0.4, h: 0.35, label: 'U8' },
+      ].map(({ x, z, w, h, label }, i) => (
+        <group key={`silk-${i}`} position={[x, 0.084, z]}>
+          <mesh rotation={[-Math.PI / 2, 0, 0]}>
+            <planeGeometry args={[w + 0.1, h + 0.1]} />
+            <meshBasicMaterial color="#FFFFFF" transparent opacity={0.04} side={THREE.DoubleSide} />
+          </mesh>
+        </group>
+      ))}
 
-        {/* NPU Compute Unit Grid (64 cores) on die surface */}
-        <group ref={npuGridRef} position={[0, 0.12, 0]}>
-          {Array.from({ length: 8 }).map((_, row) =>
-            Array.from({ length: 8 }).map((_, col) => {
-              const idx = row * 8 + col;
-              const wave = Math.sin(idx * 0.3 + npuActive * 8) * 0.5 + 0.5;
+      {/* ====== Copper routing lines ====== */}
+      {Array.from({ length: 8 }).map((_, i) => (
+        <mesh key={`trace-h-${i}`} position={[-1.7 + i * 0.45, 0.081, -1.15]} rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[0.04, 2.1]} />
+          <meshBasicMaterial color={GOLD_DIM} transparent opacity={0.08} side={THREE.DoubleSide} />
+        </mesh>
+      ))}
+      {Array.from({ length: 8 }).map((_, i) => (
+        <mesh key={`trace-h2-${i}`} position={[-1.7 + i * 0.45, 0.081, 1.15]} rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[0.04, 2.1]} />
+          <meshBasicMaterial color={GOLD_DIM} transparent opacity={0.08} side={THREE.DoubleSide} />
+        </mesh>
+      ))}
+
+      {/* ====== Heatsink on SoC ====== */}
+      <group position={[0, 0.28, 0]}>
+        {/* Heatsink base plate */}
+        <mesh castShadow>
+          <boxGeometry args={[1.7, 0.06, 1.7]} />
+          <meshStandardMaterial color="#3A3A42" roughness={0.25} metalness={0.7} />
+        </mesh>
+        {/* Heatsink fins */}
+        {Array.from({ length: 9 }).map((_, fi) => (
+          <mesh key={`fin-${fi}`} position={[(fi - 4) * 0.18, 0.06, 0]} castShadow>
+            <boxGeometry args={[0.06, 0.16, 1.6]} />
+            <meshStandardMaterial color="#44444C" roughness={0.3} metalness={0.65} />
+          </mesh>
+        ))}
+        {/* Cross fins */}
+        {Array.from({ length: 2 }).map((_, fi) => (
+          <mesh key={`crossfin-${fi}`} position={[0, 0.06, (fi - 0.5) * 0.8]} castShadow>
+            <boxGeometry args={[1.6, 0.16, 0.06]} />
+            <meshStandardMaterial color="#44444C" roughness={0.3} metalness={0.65} />
+          </mesh>
+        ))}
+
+        {/* NPU Core Grid on heatsink top */}
+        <group position={[0, 0.16, 0]}>
+          {Array.from({ length: 10 }).map((_, row) =>
+            Array.from({ length: 10 }).map((_, col) => {
+              const idx = row * 10 + col;
+              const wave = Math.sin(idx * 0.25 + npuActive * 6) * 0.5 + 0.5;
               return (
-                <mesh key={`core-${idx}`} position={[(col - 3.5) * 0.12, 0, (row - 3.5) * 0.12]}>
-                  <boxGeometry args={[0.08, 0.01, 0.08]} />
-                  <meshStandardMaterial color={GOLD} roughness={0.1} metalness={0.6} emissive={GOLD} emissiveIntensity={0.1 + wave * npuActive * 0.9} />
+                <mesh key={`core-${idx}`} position={[(col - 4.5) * 0.14, 0.005, (row - 4.5) * 0.14]}>
+                  <boxGeometry args={[0.1, 0.012, 0.1]} />
+                  <meshStandardMaterial color={GOLD} roughness={0.08} metalness={0.7} emissive={GOLD} emissiveIntensity={0.05 + wave * npuActive} />
                 </mesh>
               );
             })
           )}
         </group>
-
-        {/* Chip corner dot (pin 1 marker) */}
-        <mesh position={[-0.65, 0.12, -0.65]}>
-          <sphereGeometry args={[0.04, 16, 16]} />
-          <meshStandardMaterial color={GOLD} roughness={0.1} metalness={0.9} emissive={GOLD} emissiveIntensity={0.5} />
-        </mesh>
       </group>
 
-      {/* ── Surrounding DRAM chips (4x LPDDR4) ── */}
-      {[[-0.9, -1], [0.9, -1], [-0.9, 1], [0.9, 1]].map(([dx, dz], i) => (
-        <group key={`dram-${i}`} position={[dx, 0.11, dz]}>
+      {/* ====== SoC substrate (under heatsink) ====== */}
+      <mesh position={[0, 0.16, 0]} castShadow>
+        <boxGeometry args={[1.5, 0.12, 1.5]} />
+        <meshStandardMaterial color="#1A1A28" roughness={0.12} metalness={0.3} />
+      </mesh>
+      {/* BGA ball array underneath (visible from side) */}
+      {Array.from({ length: 12 }).map((_, i) => (
+        <mesh key={`bga-${i}`} position={[-0.65 + i * 0.12, 0.08, -0.7]}>
+          <sphereGeometry args={[0.02, 8, 8]} />
+          <meshStandardMaterial color={GOLD} roughness={0.1} metalness={0.95} />
+        </mesh>
+      ))}
+
+      {/* ====== DRAM chips (4x LPDDR4X) ====== */}
+      {[[-1.05, -1.15], [1.05, -1.15], [-1.05, 1.15], [1.05, 1.15]].map(([dx, dz], i) => (
+        <group key={`dram-${i}`} position={[dx, 0.12, dz]}>
           <mesh castShadow>
-            <boxGeometry args={[0.35, 0.08, 0.25]} />
-            <meshStandardMaterial color="#1A1A26" roughness={0.15} metalness={0.3} />
+            <boxGeometry args={[0.5, 0.1, 0.35]} />
+            <meshStandardMaterial color="#181824" roughness={0.12} metalness={0.25} />
           </mesh>
-          {/* DRAM top surface */}
-          <mesh position={[0, 0.05, 0]}>
-            <boxGeometry args={[0.3, 0.02, 0.2]} />
-            <meshStandardMaterial color="#222230" roughness={0.1} metalness={0.35} />
+          <mesh position={[0, 0.06, 0]}>
+            <boxGeometry args={[0.42, 0.025, 0.28]} />
+            <meshStandardMaterial color="#202030" roughness={0.08} metalness={0.3} />
           </mesh>
+          {/* DRAM pin indicators */}
+          {Array.from({ length: 6 }).map((_, pi) => (
+            <mesh key={`dpin-${pi}`} position={[-0.2 + pi * 0.08, -0.06, 0.16]}>
+              <boxGeometry args={[0.03, 0.03, 0.03]} />
+              <meshStandardMaterial color={GOLD} roughness={0.15} metalness={0.85} />
+            </mesh>
+          ))}
         </group>
       ))}
 
-      {/* ── PMIC (power management) ── */}
-      <group position={[-1.2, 0.11, -0.5]}>
+      {/* ====== PMIC cluster ====== */}
+      <group position={[-1.4, 0.11, -0.55]}>
         <mesh castShadow>
-          <boxGeometry args={[0.3, 0.08, 0.3]} />
-          <meshStandardMaterial color="#1A1A24" roughness={0.2} metalness={0.2} />
+          <boxGeometry args={[0.4, 0.09, 0.4]} />
+          <meshStandardMaterial color="#1A1A22" roughness={0.18} metalness={0.2} />
         </mesh>
-        {/* Inductor coils (small silver cubes) */}
-        {[[-0.08, 0.05, -0.08], [0.08, 0.05, -0.08], [-0.08, 0.05, 0.08], [0.08, 0.05, 0.08]].map(([ix, iy, iz], j) => (
-          <mesh key={`ind-${j}`} position={[ix, iy, iz]}>
-            <boxGeometry args={[0.08, 0.04, 0.08]} />
-            <meshStandardMaterial color="#C0C0C8" roughness={0.2} metalness={0.7} />
-          </mesh>
-        ))}
-      </group>
-
-      {/* ── eMMC / Flash storage ── */}
-      <group position={[1.15, 0.11, -0.5]}>
-        <mesh castShadow>
-          <boxGeometry args={[0.4, 0.08, 0.35]} />
-          <meshStandardMaterial color="#181824" roughness={0.18} metalness={0.25} />
-        </mesh>
-      </group>
-
-      {/* ── WiFi/BT module ── */}
-      <group position={[1.3, 0.1, 0.8]}>
-        <mesh castShadow>
-          <boxGeometry args={[0.35, 0.06, 0.3]} />
-          <meshStandardMaterial color="#1C1C28" roughness={0.2} metalness={0.25} />
-        </mesh>
-        {/* Antenna trace */}
-        <mesh position={[0, 0.04, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <planeGeometry args={[0.2, 0.15]} />
-          <meshBasicMaterial color={GOLD_DIM} transparent opacity={0.2} side={THREE.DoubleSide} />
-        </mesh>
-      </group>
-
-      {/* ── 40-Pin GPIO Header ── */}
-      <group position={[-1.55, 0.18, -0.3]}>
-        <mesh>
-          <boxGeometry args={[0.1, 0.25, 1.5]} />
-          <meshStandardMaterial color="#0A0A10" roughness={0.4} metalness={0.1} />
-        </mesh>
-        {Array.from({ length: 20 }).map((_, i) => (
-          <group key={`gpio-${i}`} position={[0, 0.1, -0.7 + i * 0.074]}>
+        {/* Inductor coils */}
+        {[[-0.1, 0.06, -0.1], [0.1, 0.06, -0.1], [-0.1, 0.06, 0.1], [0.1, 0.06, 0.1]].map(([ix, iy, iz], j) => (
+          <group key={`ind-${j}`} position={[ix, iy, iz]}>
             <mesh>
-              <cylinderGeometry args={[0.02, 0.02, 0.12, 8]} />
-              <meshStandardMaterial color={GOLD} roughness={0.2} metalness={0.9} />
+              <cylinderGeometry args={[0.05, 0.05, 0.04, 16]} />
+              <meshStandardMaterial color="#C8C8D0" roughness={0.15} metalness={0.75} />
             </mesh>
           </group>
         ))}
+        {/* Small capacitors */}
+        {[[-0.15, 0.06, 0], [0.15, 0.06, 0], [0, 0.06, -0.15], [0, 0.06, 0.15]].map(([cx, cy, cz], j) => (
+          <mesh key={`cap-${j}`} position={[cx, cy, cz]}>
+            <boxGeometry args={[0.06, 0.05, 0.03]} />
+            <meshStandardMaterial color="#A08060" roughness={0.4} metalness={0.1} />
+          </mesh>
+        ))}
       </group>
 
-      {/* ── Connectors ── */}
-      {/* USB-C */}
-      <group position={[-1.8, 0.05, 1]}>
+      {/* ====== eMMC ====== */}
+      <group position={[1.35, 0.11, -0.55]}>
+        <mesh castShadow>
+          <boxGeometry args={[0.5, 0.1, 0.45]} />
+          <meshStandardMaterial color="#161622" roughness={0.15} metalness={0.22} />
+        </mesh>
+        <mesh position={[0, 0.06, 0]}>
+          <boxGeometry args={[0.42, 0.02, 0.38]} />
+          <meshStandardMaterial color="#1E1E2A" roughness={0.1} metalness={0.28} />
+        </mesh>
+      </group>
+
+      {/* ====== WiFi/BT combo ====== */}
+      <group position={[1.55, 0.1, 1.0]}>
+        <mesh castShadow>
+          <boxGeometry args={[0.4, 0.07, 0.35]} />
+          <meshStandardMaterial color="#1A1A26" roughness={0.18} metalness={0.22} />
+        </mesh>
+        {/* Ceramic antenna */}
+        <mesh position={[0.15, 0.05, 0]}>
+          <boxGeometry args={[0.12, 0.04, 0.08]} />
+          <meshStandardMaterial color="#E8E8E0" roughness={0.3} metalness={0.05} />
+        </mesh>
+        {/* Antenna trace pattern */}
+        <mesh position={[-0.05, 0.045, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[0.25, 0.2]} />
+          <meshBasicMaterial color={GOLD_DIM} transparent opacity={0.15} side={THREE.DoubleSide} />
+        </mesh>
+      </group>
+
+      {/* ====== 40-Pin GPIO header (dual row) ====== */}
+      <group position={[-1.78, 0.2, -0.3]}>
+        {/* Plastic shroud */}
         <mesh>
-          <boxGeometry args={[0.08, 0.09, 0.25]} />
-          <meshStandardMaterial color="#AAA" roughness={0.3} metalness={0.55} />
+          <boxGeometry args={[0.1, 0.28, 1.6]} />
+          <meshStandardMaterial color="#0C0C14" roughness={0.5} metalness={0.05} />
+        </mesh>
+        {/* Pin row 1 */}
+        {Array.from({ length: 20 }).map((_, i) => (
+          <mesh key={`gpio1-${i}`} position={[-0.03, 0.1, -0.76 + i * 0.08]}>
+            <cylinderGeometry args={[0.022, 0.022, 0.15, 10]} />
+            <meshStandardMaterial color={GOLD} roughness={0.15} metalness={0.92} />
+          </mesh>
+        ))}
+        {/* Pin row 2 */}
+        {Array.from({ length: 20 }).map((_, i) => (
+          <mesh key={`gpio2-${i}`} position={[0.03, 0.1, -0.76 + i * 0.08]}>
+            <cylinderGeometry args={[0.022, 0.022, 0.15, 10]} />
+            <meshStandardMaterial color={GOLD} roughness={0.15} metalness={0.92} />
+          </mesh>
+        ))}
+      </group>
+
+      {/* ====== Connectors (left edge) ====== */}
+      {/* USB-C with internal pin */}
+      <group position={[-2.0, 0.04, 1.15]}>
+        <mesh>
+          <boxGeometry args={[0.06, 0.10, 0.28]} />
+          <meshStandardMaterial color="#999" roughness={0.25} metalness={0.6} />
+        </mesh>
+        <mesh position={[0.03, 0, 0]}>
+          <boxGeometry args={[0.02, 0.06, 0.2]} />
+          <meshStandardMaterial color={GOLD} roughness={0.15} metalness={0.8} />
         </mesh>
       </group>
       {/* HDMI */}
-      <group position={[-1.8, 0.05, 0.55]}>
+      <group position={[-2.0, 0.04, 0.65]}>
         <mesh>
-          <boxGeometry args={[0.08, 0.08, 0.3]} />
-          <meshStandardMaterial color="#AAA" roughness={0.3} metalness={0.55} />
+          <boxGeometry args={[0.06, 0.09, 0.34]} />
+          <meshStandardMaterial color="#999" roughness={0.25} metalness={0.6} />
         </mesh>
       </group>
-      {/* CSI camera connectors */}
-      {[[-1.8, 0.05, -0.7], [-1.8, 0.05, -0.95]].map(([x, y, z], i) => (
+      {/* MIPI CSI ×3 (camera interfaces) */}
+      {[[-2.0, 0.04, -0.7], [-2.0, 0.04, -0.95], [-2.0, 0.04, -1.2]].map(([x, y, z], i) => (
         <group key={`csi-${i}`} position={[x, y, z]}>
           <mesh>
-            <boxGeometry args={[0.06, 0.05, 0.15]} />
-            <meshStandardMaterial color="#CCC" roughness={0.25} metalness={0.6} />
+            <boxGeometry args={[0.05, 0.05, 0.16]} />
+            <meshStandardMaterial color="#CCC" roughness={0.2} metalness={0.65} />
           </mesh>
         </group>
       ))}
-      {/* Ethernet jack */}
-      <group position={[1.8, 0.05, -1]}>
+
+      {/* ====== Connectors (right edge) ====== */}
+      {/* Ethernet */}
+      <group position={[2.0, 0.04, -1.1]}>
         <mesh>
-          <boxGeometry args={[0.1, 0.11, 0.3]} />
-          <meshStandardMaterial color="#999" roughness={0.25} metalness={0.5} />
+          <boxGeometry args={[0.08, 0.12, 0.35]} />
+          <meshStandardMaterial color="#888" roughness={0.25} metalness={0.55} />
+        </mesh>
+        <mesh position={[0.03, 0, 0]}>
+          <boxGeometry args={[0.02, 0.07, 0.25]} />
+          <meshStandardMaterial color={GOLD} roughness={0.15} metalness={0.8} />
+        </mesh>
+      </group>
+      {/* Audio jack */}
+      <group position={[2.0, 0.04, -0.55]}>
+        <mesh>
+          <cylinderGeometry args={[0.06, 0.06, 0.08, 16]} rotation={[0, 0, Math.PI / 2]} />
+          <meshStandardMaterial color="#AAA" roughness={0.25} metalness={0.6} />
+        </mesh>
+      </group>
+      {/* DC power barrel jack */}
+      <group position={[2.0, 0.04, 1.1]}>
+        <mesh>
+          <cylinderGeometry args={[0.07, 0.07, 0.1, 20]} rotation={[0, 0, Math.PI / 2]} />
+          <meshStandardMaterial color="#777" roughness={0.3} metalness={0.6} />
+        </mesh>
+        <mesh position={[0.04, 0, 0]}>
+          <cylinderGeometry args={[0.03, 0.03, 0.06, 10]} rotation={[0, 0, Math.PI / 2]} />
+          <meshStandardMaterial color={GOLD} roughness={0.2} metalness={0.8} />
         </mesh>
       </group>
 
-      {/* ── NPU Activity Ring (pulses around the SoC when computing) ── */}
+      {/* ====== Status LEDs ====== */}
+      {[[-1.85, 0.09, 0.05], [-1.85, 0.09, -0.1], [1.85, 0.09, 0.0]].map(([lx, ly, lz], i) => (
+        <mesh key={`led-${i}`} position={[lx, ly, lz]}>
+          <boxGeometry args={[0.03, 0.02, 0.04]} />
+          <meshStandardMaterial color={i === 0 ? '#34C759' : i === 1 ? '#FFD700' : '#00D4FF'} roughness={0.1} emissive={i === 0 ? '#34C759' : i === 1 ? '#FFD700' : '#00D4FF'} emissiveIntensity={0.6} />
+        </mesh>
+      ))}
+
+      {/* ====== NPU Activity effects ====== */}
       {npuActive > 0.1 && (
-        <mesh position={[0, 0.22, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[0.65, 0.72, 80]} />
-          <meshBasicMaterial color={GOLD} side={THREE.DoubleSide} transparent opacity={0.15 + npuActive * 0.35} />
-        </mesh>
-      )}
-      {/* Outer activity ripple */}
-      {npuActive > 0.3 && (
-        <mesh position={[0, 0.21, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[0.73, 0.78, 80]} />
-          <meshBasicMaterial color={GOLD} side={THREE.DoubleSide} transparent opacity={0.06 + npuActive * 0.2} />
-        </mesh>
+        <>
+          {/* Inner ring around chip area */}
+          <mesh position={[0, 0.42, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+            <ringGeometry args={[0.85, 0.92, 100]} />
+            <meshBasicMaterial color={GOLD} side={THREE.DoubleSide} transparent opacity={0.12 + npuActive * 0.35} />
+          </mesh>
+          {/* Outer ripple pulse */}
+          <mesh position={[0, 0.40, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+            <ringGeometry args={[1.0, 1.06, 100]} />
+            <meshBasicMaterial color={GOLD} side={THREE.DoubleSide} transparent opacity={0.04 + npuActive * 0.18} />
+          </mesh>
+          {/* Glow sphere around the whole chip */}
+          <mesh position={[0, 0.35, 0]}>
+            <sphereGeometry args={[1.1, 32, 32]} />
+            <meshBasicMaterial color={GOLD} transparent opacity={0.02 + npuActive * 0.04} />
+          </mesh>
+        </>
       )}
     </group>
   );
@@ -822,11 +939,11 @@ export function SensorShowcase() {
   const handleReset = useCallback(() => { timeRef.current = 0; setAutoTime(0); setModuleId('overview'); setMode('auto'); setAutoPlaying(true); }, []);
 
   return (
-    <section ref={sectionRef} className="section-full relative bg-black overflow-hidden">
-      <div className="absolute inset-0">
-        <Canvas camera={{ position: [0, 4, 10], fov: 40, near: 0.1, far: 50 }} gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.1 }} dpr={[1, 2]}>
-          <color attach="background" args={['#08080C']} />
-          <fog attach="fog" args={['#08080C', 12, 45]} />
+    <section ref={sectionRef} className="section-full relative overflow-hidden" style={{ background: '#060B14' }}>
+      <div className="absolute inset-0" style={{ pointerEvents: mode === 'auto' ? 'none' : 'auto' }}>
+        <Canvas camera={{ position: [0, 4, 10], fov: 40, near: 0.1, far: 50 }} gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.1 }} dpr={[1, 2]} style={{ pointerEvents: mode === 'auto' ? 'none' : 'auto' }}>
+          <color attach="background" args={['#060B14']} />
+          <fog attach="fog" args={['#060B14', 12, 45]} />
           <LightingSetup />
           <AtmosphericDust />
           <Suspense fallback={null}>
