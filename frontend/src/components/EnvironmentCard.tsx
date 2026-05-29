@@ -45,11 +45,11 @@ function useEnv<T>(path: string, init: T, interval = 30000) {
 }
 
 // ── SVG Ring Gauge (enlarged) ──
-function RingGauge({ pct, size = 160, stroke = 10 }: { pct: number; size?: number; stroke?: number }) {
+function RingGauge({ pct, size = 160, stroke = 10, colorOverride }: { pct: number; size?: number; stroke?: number; colorOverride?: string }) {
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
   const offset = c * (1 - pct / 100);
-  const color = pct < 30 ? '#FF3B30' : pct < 60 ? '#FFD700' : '#34C759';
+  const color = colorOverride || (pct < 30 ? '#FF3B30' : pct < 60 ? '#FFD700' : '#34C759');
 
   return (
     <svg width={size} height={size} className="transform -rotate-90">
@@ -117,9 +117,8 @@ export function EnvironmentCard() {
   const isLive = w._source === 'open-meteo';
 
   const contribution = useMemo(() => {
-    if (!w.is_day) return 0;
     return Math.round(100 - impact.recommended_brightness_pct);
-  }, [w.is_day, impact.recommended_brightness_pct]);
+  }, [impact.recommended_brightness_pct]);
 
   const todaySavedKwh = useMemo(() => {
     if (!w.is_day) return 0;
@@ -127,20 +126,34 @@ export function EnvironmentCard() {
     return +(BASELINE_POWER_W / 1000 * daylightHours * contribution / 100).toFixed(2);
   }, [w.is_day, contribution]);
 
-  const statusLabel = w.is_day
-    ? contribution >= 60 ? '自然光充沛，大幅节能中' : contribution >= 30 ? '自然光适中，部分补偿中' : '自然光不足，需人工补光'
-    : '夜间模式，全人工照明';
+  const isNight = !w.is_day;
+  const statusLabel = isNight
+    ? '夜间模式 · 全人工照明'
+    : contribution >= 60 ? '自然光充沛，大幅节能中'
+    : contribution >= 30 ? '自然光适中，部分补偿中'
+    : '自然光不足，需人工补光';
 
-  const statusColor = w.is_day
-    ? contribution >= 60 ? '#34C759' : contribution >= 30 ? '#FFD700' : '#FF9500'
-    : '#5A7090';
+  const statusColor = isNight
+    ? '#5A7090'
+    : contribution >= 60 ? '#34C759'
+    : contribution >= 30 ? '#FFD700'
+    : '#FF9500';
 
-  const statusBg = w.is_day
-    ? contribution >= 60 ? 'rgba(52,199,89,0.08)' : contribution >= 30 ? 'rgba(255,215,0,0.08)' : 'rgba(255,149,0,0.08)'
-    : 'rgba(90,112,144,0.08)';
+  const statusBg = isNight
+    ? 'rgba(90,112,144,0.08)'
+    : contribution >= 60 ? 'rgba(52,199,89,0.08)'
+    : contribution >= 30 ? 'rgba(255,215,0,0.08)'
+    : 'rgba(255,149,0,0.08)';
 
   // Scale solar radiation to 0-100 for the bar (max ~900 W/m²)
   const solarScale = Math.min(100, Math.round((w.solar_radiation / 900) * 100));
+
+  // Gauge color logic: nighttime = gray, otherwise color by contribution
+  const gaugePct = isNight ? 0 : contribution;
+  const gaugeColor = isNight ? '#5A7090'
+    : contribution >= 60 ? '#34C759'
+    : contribution >= 30 ? '#FFD700'
+    : '#FF3B30';
 
   return (
     <div className="glass-card rounded-xl p-6 glow-border h-full flex flex-col">
@@ -165,23 +178,29 @@ export function EnvironmentCard() {
       {/* ── Center: Large Ring Gauge ── */}
       <div className="flex justify-center mb-4">
         <div className="relative">
-          <RingGauge pct={contribution} size={160} stroke={10} />
+          <RingGauge pct={gaugePct} size={160} stroke={10} colorOverride={gaugeColor} />
           {/* Center text */}
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-[40px] font-bold font-mono leading-none tracking-tighter"
-              style={{ color: contribution >= 60 ? '#34C759' : contribution >= 30 ? '#FFD700' : '#FF3B30' }}>
-              {contribution}
+            <span className="text-[36px] font-bold font-mono leading-none tracking-tighter"
+              style={{ color: gaugeColor }}>
+              {isNight ? '🌙' : contribution}
             </span>
-            <span className="text-[11px] text-text-muted mt-1">%</span>
+            <span className="text-[11px] text-text-muted mt-1">
+              {isNight ? '夜间' : '%'}
+            </span>
           </div>
         </div>
       </div>
 
       {/* ── Subtitle ── */}
       <p className="text-center text-[11px] text-text-secondary leading-relaxed mb-5 px-2">
-        当前教室所需照明中，
-        <span className="text-gold font-semibold">{contribution}%</span> 由自然光提供，
-        仅需 <span className="text-cyan font-semibold">{impact.recommended_brightness_pct}%</span> 人工补光
+        {isNight ? (
+          <>日落之后，教室照明<span className="text-cyan font-semibold">100%</span>由人工光源提供</>
+        ) : contribution >= 50 ? (
+          <>当前教室所需照明中，<span className="text-gold font-semibold">{contribution}%</span> 由自然光提供，仅需 <span className="text-cyan font-semibold">{impact.recommended_brightness_pct}%</span> 人工补光</>
+        ) : (
+          <>自然光仅能提供 <span className="text-gold font-semibold">{contribution}%</span> 照度，需 <span className="text-cyan font-semibold">{impact.recommended_brightness_pct}%</span> 人工照明补偿</>
+        )}
       </p>
 
       {/* ── Flow bars ── */}
