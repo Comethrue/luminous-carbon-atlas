@@ -157,8 +157,13 @@ for obj in all_objects:
         applied += 1
 
 # 找出最大的物体 → 肯定是 PCB 基板，给它 PCB 材质
-largest = max(all_objects, key=lambda o: max(o.dimensions))
-largest.active_material = mats['PCB_FR4']
+try:
+    mesh_objs = [o for o in bpy.data.objects if o.type == 'MESH']
+    if mesh_objs:
+        largest = max(mesh_objs, key=lambda o: max(o.dimensions) if o.dimensions else 0)
+        largest.active_material = mats['PCB_FR4']
+except:
+    pass  # 如果找不到就算了，材质已经通过 MTL 映射处理过了
 
 print(f"  应用了 {applied} 个材质")
 
