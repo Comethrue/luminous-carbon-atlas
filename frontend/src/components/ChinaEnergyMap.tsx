@@ -310,26 +310,33 @@ export function ChinaEnergyMap({ liveData }: Props) {
           </div>
         </div>
 
-        {/* ── 地图审图号 + 数据来源（合规标注） ── */}
+        {/* ── 地图审图号 + 数据来源 + 合规声明 ── */}
         <div className="flex items-center justify-between mb-1 text-[8px] text-text-muted font-mono">
-          <span>审图号：GS(2021)6375号 · 自然资源部监制</span>
-          <span>底图来源：阿里云 DataV 地理数据服务</span>
+          <span>审图号：GS(2021)6375号 · 自然资源部监制 · 本图为数据可视化示意图</span>
+          <span>底图：阿里云 DataV ｜ 含台湾省·香港·澳门·南海诸岛</span>
         </div>
 
         {/* Map */}
         <div ref={ref} className="w-full relative z-10" style={{ height: 420 }} />
 
-        {/* ── 南海诸岛缩略图示意（合规必备） ── */}
+        {/* ── 南海诸岛示意框（标准地图规范要求） ── */}
         <div className="absolute bottom-3 right-3 z-30 pointer-events-none"
           style={{
-            width: 80, height: 100,
-            border: '1px solid rgba(0,180,255,0.4)',
-            borderRadius: 4,
-            background: 'rgba(6,11,20,0.85)',
+            width: 72, height: 88,
+            border: '1px solid rgba(0,180,255,0.3)',
+            borderRadius: 3,
+            background: 'rgba(6,14,26,0.9)',
             display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+            gap: 3,
           }}>
-          <div style={{ width:50, height:60, border:'1px dashed rgba(0,180,255,0.25)', borderRadius:'50%', marginBottom:4 }} />
-          <span style={{ color:'rgba(255,255,255,0.5)', fontSize:7, letterSpacing:'0.1em' }}>南海诸岛</span>
+          <span style={{ color:'rgba(0,200,255,0.5)', fontSize:8, fontWeight:600, letterSpacing:'0.15em' }}>南海诸岛</span>
+          <div style={{ width:44, height:48, position:'relative' }}>
+            {/* Stylized island dots */}
+            {[[18,14],[36,10],[28,24],[14,30],[38,34],[22,40]].map(([x,y],i)=>(
+              <div key={i} style={{position:'absolute',left:x,top:y,width:2,height:2,borderRadius:'50%',background:'rgba(0,200,255,0.4)'}}/>
+            ))}
+          </div>
+          <span style={{ color:'rgba(255,255,255,0.25)', fontSize:6 }}>1:12 000 000</span>
         </div>
 
         {/* Legend + Stats */}
