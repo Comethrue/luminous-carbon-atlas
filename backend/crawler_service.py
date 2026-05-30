@@ -3,7 +3,7 @@
 
 数据源:
   1. 碳交易价格 — 模拟上海环境能源交易所 CEA 碳配额价格
-  2. 10城市实时天气 — 和风天气 API（GDP前十城市）
+  2. 10城市实时天气 — 内置仿真模型
   3. 电网负荷指数 — 模拟国家电网实时负荷率
 """
 
@@ -12,25 +12,8 @@ import random
 import time
 import threading
 from datetime import datetime
-from urllib.request import urlopen, Request
-from urllib.parse import urlencode
 
-# 和风天气 API Key
-QWEATHER_KEY = "69f80553ec1b4b7480eefef37543f430"
-
-# GDP TOP 10 城市及对应的和风城市 ID
-GDP_TOP10_CITY_IDS = {
-    "上海": "101020100",
-    "北京": "101010100",
-    "深圳": "101280601",
-    "广州": "101280101",
-    "重庆": "101040100",
-    "苏州": "101190401",
-    "成都": "101270101",
-    "杭州": "101210101",
-    "武汉": "101200101",
-    "南京": "101190101",
-}
+# 城市天气使用内置仿真模型（无需外部API）
 
 # ═══════════════════════════════════════════════════════
 # GDP TOP 10 城市坐标 + 高校数
@@ -101,48 +84,17 @@ def _simulate_grid_load() -> dict:
     }
 
 
-def _fetch_city_weather(city_name: str) -> dict | None:
-    """从和风天气 API 获取城市实时天气"""
-    city_id = GDP_TOP10_CITY_IDS.get(city_name)
-    if not city_id:
-        return None
-    try:
-        url = "https://devapi.qweather.com/v7/weather/now?" + urlencode({
-            "key": QWEATHER_KEY, "location": city_id
-        })
-        req = Request(url, headers={"User-Agent": "LuminousCarbonAtlas/1.0"})
-        with urlopen(req, timeout=5) as resp:
-            data = json.loads(resp.read())
-            now = data.get("now", {})
-            return {
-                "temp": float(now.get("temp", 20)),
-                "cloud": int(now.get("cloud", 50)),
-                "text": now.get("text", "多云"),
-                "humidity": int(now.get("humidity", 60)),
-                "windSpeed": float(now.get("windSpeed", 2)),
-            }
-    except Exception:
-        return None
-
-
 def _get_city_env(city: dict) -> dict:
-    """获取城市环境数据：优先真实API，失败则模拟"""
-    real = _fetch_city_weather(city["name"])
+    """获取城市环境数据（内置仿真模型）"""
     hour = datetime.now().hour
-
-    if real:
-        cloud = real["cloud"]
-        temp = real["temp"]
-        source = "qweather"
+    lat_factor = 1 - abs(city["lat"] - 30) / 20
+    if hour < 6 or hour > 19:
+        cloud = random.randint(50, 95)
     else:
-        lat_factor = 1 - abs(city["lat"] - 30) / 20
-        if hour < 6 or hour > 19:
-            cloud = random.randint(50, 95)
-        else:
-            cloud = random.randint(10, 75)
-        temp_base = 20 + lat_factor * 8
-        temp = round(temp_base - abs(hour - 14) * 0.5 + random.uniform(-3, 3), 1)
-        source = "simulated"
+        cloud = random.randint(10, 75)
+    temp_base = 20 + lat_factor * 8
+    temp = round(temp_base - abs(hour - 14) * 0.5 + random.uniform(-3, 3), 1)
+    source = "simulated"
 
     if hour < 6 or hour > 19:
         solar = 0

@@ -18,7 +18,6 @@ from urllib.request import urlopen, Request
 from urllib.parse import urlencode
 
 CACHE_FILE = Path(__file__).resolve().parent.parent / "data" / "live_cache.json"
-QWEATHER_KEY = "69f80553ec1b4b7480eefef37543f430"
 
 
 def load_cache() -> dict:
@@ -181,7 +180,7 @@ def run_startup_crawl() -> dict:
     if weather["success"]:
         print(f"  [Weather] OK {weather['city']}: {weather['temp']}C, {weather['text']}")
     else:
-        print(f"  [Weather] FALLBACK QWeather key not active, using simulation")
+        print(f"  [Weather] FALLBACK using simulated data")
 
     # 合并到缓存
     cache["live"] = report
