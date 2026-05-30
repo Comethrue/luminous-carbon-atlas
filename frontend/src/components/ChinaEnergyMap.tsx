@@ -319,27 +319,7 @@ export function ChinaEnergyMap({ liveData }: Props) {
         {/* Map */}
         <div ref={ref} className="w-full relative z-10" style={{ height: 420 }} />
 
-        {/* ── 南海诸岛示意框（标准地图规范要求） ── */}
-        <div className="absolute top-2 left-2 z-30 pointer-events-none"
-          style={{
-            width: 72, height: 88,
-            border: '1px solid rgba(0,180,255,0.3)',
-            borderRadius: 3,
-            background: 'rgba(6,14,26,0.9)',
-            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-            gap: 3,
-          }}>
-          <span style={{ color:'rgba(0,200,255,0.5)', fontSize:8, fontWeight:600, letterSpacing:'0.15em' }}>南海诸岛</span>
-          <div style={{ width:44, height:48, position:'relative' }}>
-            {/* Stylized island dots */}
-            {[[18,14],[36,10],[28,24],[14,30],[38,34],[22,40]].map(([x,y],i)=>(
-              <div key={i} style={{position:'absolute',left:x,top:y,width:2,height:2,borderRadius:'50%',background:'rgba(0,200,255,0.4)'}}/>
-            ))}
-          </div>
-          <span style={{ color:'rgba(255,255,255,0.25)', fontSize:6 }}>1:12 000 000</span>
-        </div>
-
-        {/* Legend + Stats */}
+        {/* Legend + Stats + 南海诸岛 */}
         <div className="flex items-center justify-between mt-2 text-[9px] font-mono">
           <div className="flex items-center gap-3 text-text-muted">
             <span className="flex items-center gap-1"><span className="text-xs" style={{color:'#34C759'}}>◆</span> 广东AI试点</span>
@@ -348,9 +328,21 @@ export function ChinaEnergyMap({ liveData }: Props) {
             <span className="flex items-center gap-1"><span className="text-xs" style={{color:'rgba(255,255,255,0.5)'}}>●</span> 省会</span>
             <span className="text-text-muted">| 滚轮缩放</span>
           </div>
-          <span className="text-text-muted">
-            全国潜力 {Object.values(PROVINCE_DATA).reduce((a,b)=>a+b,0).toFixed(0)}万kWh/年
-          </span>
+          <div className="flex items-center gap-3">
+            {/* ── 南海诸岛标识 ── */}
+            <div className="flex items-center gap-1.5 px-2 py-1 rounded"
+              style={{ border:'1px solid rgba(0,180,255,0.25)', background:'rgba(6,14,26,0.8)' }}>
+              <div style={{ width:16, height:18, position:'relative', flexShrink:0 }}>
+                {[[4,4],[10,3],[7,8],[3,10],[11,11],[6,14]].map(([x,y],i)=>(
+                  <div key={i} style={{position:'absolute',left:x,top:y,width:1.5,height:1.5,borderRadius:'50%',background:'rgba(0,200,255,0.5)'}}/>
+                ))}
+              </div>
+              <span style={{ color:'rgba(0,200,255,0.6)', fontSize:7, fontWeight:600, letterSpacing:'0.1em' }}>南海诸岛</span>
+            </div>
+            <span className="text-text-muted">
+              全国潜力 {Object.values(PROVINCE_DATA).reduce((a,b)=>a+b,0).toFixed(0)}万kWh/年
+            </span>
+          </div>
         </div>
 
         {/* City strip */}
