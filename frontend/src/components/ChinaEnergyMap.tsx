@@ -320,7 +320,7 @@ export function ChinaEnergyMap({ liveData }: Props) {
         <div ref={ref} className="w-full relative z-10" style={{ height: 420 }} />
 
         {/* ── 南海诸岛示意框（标准地图规范要求） ── */}
-        <div className="absolute bottom-3 right-3 z-30 pointer-events-none"
+        <div className="absolute top-2 right-3 z-30 pointer-events-none"
           style={{
             width: 72, height: 88,
             border: '1px solid rgba(0,180,255,0.3)',
@@ -349,7 +349,7 @@ export function ChinaEnergyMap({ liveData }: Props) {
             <span className="text-text-muted">| 滚轮缩放</span>
           </div>
           <span className="text-text-muted">
-            含香港·澳门·台湾省 · 全国潜力 {Object.values(PROVINCE_DATA).reduce((a,b)=>a+b,0).toFixed(0)}万kWh/年
+            全国潜力 {Object.values(PROVINCE_DATA).reduce((a,b)=>a+b,0).toFixed(0)}万kWh/年
           </span>
         </div>
 
