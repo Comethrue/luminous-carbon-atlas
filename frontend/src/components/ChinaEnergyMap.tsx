@@ -312,8 +312,8 @@ export function ChinaEnergyMap({ liveData }: Props) {
 
         {/* ── 地图审图号 + 数据来源 + 合规声明 ── */}
         <div className="flex items-center justify-between mb-1 text-[8px] text-text-muted font-mono">
-          <span>审图号：GS(2021)6375号 · 自然资源部监制 · 本图为数据可视化示意图</span>
-          <span>底图：阿里云 DataV ｜ 含台湾省·香港·澳门·南海诸岛</span>
+          <span>审图号：GS(2021)6375号 · 自然资源部监制 · 本图为数据可视化示意图，不作为划界依据</span>
+          <span>底图：阿里云 DataV ｜ 国界及行政界线以国家正式出版地图为准</span>
         </div>
 
         {/* Map */}
