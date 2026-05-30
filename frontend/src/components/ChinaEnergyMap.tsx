@@ -320,7 +320,7 @@ export function ChinaEnergyMap({ liveData }: Props) {
         <div ref={ref} className="w-full relative z-10" style={{ height: 420 }} />
 
         {/* ── 南海诸岛示意框（标准地图规范要求） ── */}
-        <div className="absolute top-2 right-3 z-30 pointer-events-none"
+        <div className="absolute top-2 left-2 z-30 pointer-events-none"
           style={{
             width: 72, height: 88,
             border: '1px solid rgba(0,180,255,0.3)',
